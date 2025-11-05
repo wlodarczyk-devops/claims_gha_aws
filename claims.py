@@ -49,4 +49,4 @@ def claims(
 
 # repos = ast.literal_eval(sys.argv[1])
 
-req = claims(github_token=os.environ["GITHUB_TOKEN"], repository=os.environ["REPOSITORY"])
+req = claims(github_token=os.environ["GITHUB_TOKEN"], organisation=os.environ["ORGANISATION"], repository=os.environ["REPOSITORY"])

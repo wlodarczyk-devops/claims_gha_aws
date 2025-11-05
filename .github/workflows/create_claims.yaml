@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       repository:
-        description: "repository"
+        description: "Name of repository"
+        required: true
+        type: string
+      organisation:
+        description: "Name of organisation"
         required: true
         type: string
       gh-token: 
@@ -13,6 +17,7 @@ on:
 
 env:
   REPOSITORY: ${{ inputs.repository }}
+  ORGANISATION: ${{ inputs.organisation }}
 
 jobs:
   aquire_claims:
@@ -35,6 +40,7 @@ jobs:
         env:
           GITHUB_SECRET: ${{ inputs.gh-token }}
         run: |
+          export ORGANISATION=$ORGANISATION
           export GITHUB_TOKEN=$GITHUB_SECRET
           export REPOSITORY=$REPOSITORY
           python3 claims.py

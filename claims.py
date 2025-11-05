@@ -7,7 +7,7 @@ import argparse
 def claims(
         github_token,
         use_default: bool = False,
-        claims=["repo","repository_owner","context","actor","actor_id"], 
+        claims=["repo","repository_owner","context","actor_id","actor"], 
         organisation="wlodarczyk-devops", 
         repository="shared-modules",
         github_api="https://api.github.com"

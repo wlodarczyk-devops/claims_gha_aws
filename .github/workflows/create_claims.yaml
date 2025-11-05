@@ -1,0 +1,44 @@
+name: Create Claims for repository
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      repository:
+        description: "repository"
+        required: true
+        type: string
+    secrets:
+      gh-token: 
+        description: "Person GH github token"
+        required: true
+
+env:
+  REPOSITORY: ${{ inputs.repository }}
+
+jobs:
+  aquire_claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install minimal deps
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install --no-compile "requests==2.32.3"
+
+      - name: Run Python Script
+        shell: bash
+        env:
+          GITHUB_SECRET: ${{ secrets.gh-token }}
+        run: |
+          export GITHUB_TOKEN=$GITHUB_SECRET
+          export REPOSITORY=$REPOSITORY
+          python3 claims.py
+
+

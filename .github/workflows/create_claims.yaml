@@ -2,13 +2,11 @@ name: Create Claims for repository
 
 on:
   workflow_dispatch:
-  workflow_call:
     inputs:
       repository:
         description: "repository"
         required: true
         type: string
-    secrets:
       gh-token: 
         description: "Person GH github token"
         required: true
@@ -35,7 +33,7 @@ jobs:
       - name: Run Python Script
         shell: bash
         env:
-          GITHUB_SECRET: ${{ secrets.gh-token }}
+          GITHUB_SECRET: ${{ inputs.gh-token }}
         run: |
           export GITHUB_TOKEN=$GITHUB_SECRET
           export REPOSITORY=$REPOSITORY

@@ -1,46 +1,48 @@
-# Claims - In Progress of better 
+# Configure GitHub OIDC Claims for AWS
 
-If You want to automate your github workflows against AWS, You can authorize via OIDC.
-To granulate authorization, you should make it trough AWS IAM Role.
-AWS doesn't support out-of-box claims send from Github, so we need to make our own for specific repository.
+This repository configures custom GitHub OIDC `sub` claims for a target repository.
+Use it when you want stricter IAM trust policies for GitHub Actions in AWS.
 
-## Prerequisites:
+## Prerequisites
 
- - AWS IAM Role with necessary permissions
- - Setup OIDC in AWS
- - Github Personal Token
- - Github user/user_id and Organisation name
+- AWS IAM role with the required permissions
+- OIDC provider configured in AWS (`token.actions.githubusercontent.com`)
+- GitHub Personal Access Token with permissions to manage repository settings
+- Target GitHub organization and repository names
 
-## Example IAM Role Trust Entity
-```
+## Example IAM Trust Policy
 
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
     {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
-            },
-            "Action": "sts:AssumeRoleWithWebIdentity",
-            "Condition": {
-                "StringEquals": {
-                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
-                },
-                "StringLike": {
-                    "token.actions.githubusercontent.com:sub": "repo:<ORGANISATION>/<REPOSITORY>:*actor_id:<USERNAME_ID>:actor:<USERNAME>"
-	                }
-	            }
-	        }
-	    ]
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": "repo:<ORGANISATION>/<REPOSITORY>:*actor_id:<USERNAME_ID>:actor:<USERNAME>"
+        }
+      }
     }
-
+  ]
+}
 ```
-## Github Action
-To use workflow, You just need provide information:
 
- - Organisation
- - Repository
- - Personal Github Token
+## GitHub Action Usage
 
-After that, it will setup Claims for your repository.
+Run `.github/workflows/create_claims.yaml` manually and provide:
+
+- `organisation`
+- `repository`
+- `gh-token` (a PAT that can update repository OIDC customization)
+- `use-default` (`true` or `false`, defaults to `false`)
+- `include-claim-keys` (comma-separated list used when `use-default=false`)
+
+The workflow executes `claims.py` and updates OIDC claim customization for the selected repository.

@@ -11,16 +11,22 @@ on:
         description: "Name of organisation"
         required: true
         type: string
+      use-default:
+        description: "Use GitHub default OIDC subject format (true/false)"
+        required: false
+        type: string
+        default: "false"
+      include-claim-keys:
+        description: "Comma-separated custom claim keys (used when use-default=false)"
+        required: false
+        type: string
+        default: "repo,repository_owner,context,actor_id,actor"
       gh-token: 
         description: "Person GH github token"
         required: true
 
-env:
-  REPOSITORY: ${{ inputs.repository }}
-  ORGANISATION: ${{ inputs.organisation }}
-
 jobs:
-  aquire_claims:
+  acquire_claims:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,19 +36,18 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install minimal deps
+      - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip3 install --no-compile "requests==2.32.3"
+          pip3 install --no-compile -r requirements.txt
 
       - name: Run Python Script
         shell: bash
         env:
-          GITHUB_SECRET: ${{ inputs.gh-token }}
+          GITHUB_TOKEN: ${{ inputs.gh-token }}
+          ORGANISATION: ${{ inputs.organisation }}
+          REPOSITORY: ${{ inputs.repository }}
+          USE_DEFAULT: ${{ inputs.use-default }}
+          INCLUDE_CLAIM_KEYS: ${{ inputs.include-claim-keys }}
         run: |
-          export ORGANISATION=$ORGANISATION
-          export GITHUB_TOKEN=$GITHUB_SECRET
-          export REPOSITORY=$REPOSITORY
           python3 claims.py
-
-
